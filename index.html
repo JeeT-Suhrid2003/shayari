@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Shayari Generator</title>
+    <style>
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-main: #f8fafc;
+            --text-muted: #94a3b8;
+            --accent: #ec4899;
+            --accent-hover: #db2777;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 2rem;
+            letter-spacing: -0.05em;
+            background: linear-gradient(to right, #ec4899, #8b5cf6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            padding: 3rem 2rem;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            margin-bottom: 2rem;
+            min-height: 180px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: transform 0.2s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+        }
+
+        .shayari-text {
+            font-size: 1.35rem;
+            line-height: 1.8;
+            font-style: italic;
+            white-space: pre-line;
+            color: var(--text-main);
+            margin-bottom: 1.5rem;
+            transition: opacity 0.15s ease;
+        }
+
+        .shayari-id {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            transition: opacity 0.15s ease;
+        }
+
+        .btn {
+            background-color: var(--accent);
+            color: white;
+            border: none;
+            padding: 0.75rem 2rem;
+            font-size: 1rem;
+            font-weight: 600;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.3);
+        }
+
+        .btn:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-1px);
+            box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.4);
+        }
+
+        .btn:disabled {
+            background-color: var(--text-muted);
+            cursor: not-allowed;
+            box-shadow: none;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container">
+        <h1>Dil Se...</h1>
+        
+        <div class="card">
+            <p class="shayari-text" id="shayariDisplay">Loading shayaris...</p>
+            <div class="shayari-id" id="idDisplay"></div>
+        </div>
+
+        <button class="btn" id="generateBtn" disabled>Next Shayari</button>
+    </div>
+
+    <script>
+        const shayariDisplay = document.getElementById('shayariDisplay');
+        const idDisplay = document.getElementById('idDisplay');
+        const generateBtn = document.getElementById('generateBtn');
+
+        let shayariList = [];
+        let lastIndex = -1;
+
+        // Fetch the external JSON file
+        async function loadShayaris() {
+            try {
+                const response = await fetch('list2.json');
+                if (!response.ok) {
+                    throw new Error('Failed to load list2.json');
+                }
+                shayariList = await response.json();
+                
+                if (shayariList.length > 0) {
+                    generateBtn.disabled = false;
+                    displayRandomShayari();
+                } else {
+                    shayariDisplay.textContent = "The shayari list is empty.";
+                }
+            } catch (error) {
+                console.error(error);
+                shayariDisplay.textContent = "Error loading shayaris. Make sure list2.json is in the same folder.";
+            }
+        }
+
+        function displayRandomShayari() {
+            let randomIndex;
+            
+            // Prevent choosing the same one twice in a row
+            do {
+                randomIndex = Math.floor(Math.random() * shayariList.length);
+            } while (randomIndex === lastIndex && shayariList.length > 1);
+
+            lastIndex = randomIndex;
+            const selected = shayariList[randomIndex];
+            
+            // Smooth fade transition
+            shayariDisplay.style.opacity = 0;
+            idDisplay.style.opacity = 0;
+            
+            setTimeout(() => {
+                shayariDisplay.textContent = selected.text;
+                idDisplay.textContent = `Shayari #${selected.id || randomIndex + 1}`;
+                shayariDisplay.style.opacity = 1;
+                idDisplay.style.opacity = 1;
+            }, 150);
+        }
+
+        // Event listeners
+        window.addEventListener('DOMContentLoaded', loadShayaris);
+        generateBtn.addEventListener('click', displayRandomShayari);
+    </script>
+</body>
+</html>
