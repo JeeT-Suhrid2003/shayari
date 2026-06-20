@@ -1,184 +1,489 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Shayari Generator</title>
-    <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --text-main: #f8fafc;
-            --text-muted: #94a3b8;
-            --accent: #ec4899;
-            --accent-hover: #db2777;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Toota. — Shayari</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%94%3C/text%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,500;0,600;1,500;1,600&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --obsidian:#14110f;
+    --charcoal:#1c1815;
+    --charcoal-soft:#221d19;
+    --bone:#ece6dd;
+    --ash:#b7ada0;
+    --ash-dim:#86796c;
+    --ember:#b5491f;
+    --ember-bright:#e2733f;
+    --gold:#8a7250;
+    --border:rgba(236,230,221,0.09);
+  }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-        }
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-        }
+  body{
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(181,73,31,0.10), transparent 60%),
+      radial-gradient(ellipse 60% 50% at 100% 110%, rgba(138,114,80,0.08), transparent 60%),
+      var(--obsidian);
+    color:var(--bone);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:6vh 20px 5vh;
+  }
 
-        .container {
-            width: 100%;
-            max-width: 600px;
-            text-align: center;
-        }
+  .page{ width:100%; max-width:560px; display:flex; flex-direction:column; align-items:center; }
 
-        h1 {
-            font-size: 2.5rem;
-            font-weight: 700;
-            margin-bottom: 2rem;
-            letter-spacing: -0.05em;
-            background: linear-gradient(to right, #ec4899, #8b5cf6);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
+  .masthead{ text-align:center; margin-bottom:2.4rem; }
 
-        .card {
-            background-color: var(--card-bg);
-            padding: 3rem 2rem;
-            border-radius: 16px;
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            margin-bottom: 2rem;
-            min-height: 180px;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            transition: transform 0.2s ease;
-        }
+  .wordmark{
+    font-family:'Crimson Pro', serif;
+    font-weight:600;
+    font-style:italic;
+    font-size:clamp(2.1rem, 1.5rem + 2vw, 3rem);
+    letter-spacing:0.01em;
+    margin:0;
+    color:var(--bone);
+  }
+  .wordmark .dot{ color:var(--ember-bright); }
 
-        .card:hover {
-            transform: translateY(-2px);
-        }
+  .tagline{
+    margin:0.5rem 0 0;
+    font-size:0.82rem;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ash-dim);
+  }
 
-        .shayari-text {
-            font-size: 1.35rem;
-            line-height: 1.8;
-            font-style: italic;
-            white-space: pre-line;
-            color: var(--text-main);
-            margin-bottom: 1.5rem;
-            transition: opacity 0.15s ease;
-        }
+  .stage{ width:100%; display:flex; flex-direction:column; align-items:center; }
 
-        .shayari-id {
-            font-size: 0.85rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.1em;
-            transition: opacity 0.15s ease;
-        }
+  .card{
+    width:100%;
+    background:var(--charcoal);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:2.6rem 2.1rem 2rem;
+    box-shadow:0 24px 48px -24px rgba(0,0,0,0.6);
+    position:relative;
+    min-height:160px;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+  }
 
-        .btn {
-            background-color: var(--accent);
-            color: white;
-            border: none;
-            padding: 0.75rem 2rem;
-            font-size: 1rem;
-            font-weight: 600;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 6px -1px rgba(236, 72, 153, 0.3);
-        }
+  .shayari{
+    font-family:'Crimson Pro', serif;
+    font-style:italic;
+    font-weight:500;
+    font-size:clamp(1.18rem, 1.02rem + 1vw, 1.55rem);
+    line-height:1.85;
+    white-space:pre-line;
+    text-align:center;
+    color:var(--bone);
+    margin:0 0 1.6rem;
+    transition:opacity 0.22s ease;
+  }
 
-        .btn:hover {
-            background-color: var(--accent-hover);
-            transform: translateY(-1px);
-            box-shadow: 0 10px 15px -3px rgba(236, 72, 153, 0.4);
-        }
+  .crack{ width:100%; height:22px; display:block; overflow:visible; }
+  .crack path{
+    fill:none;
+    stroke:var(--ember-bright);
+    stroke-width:1.4;
+    stroke-linecap:round;
+    filter:drop-shadow(0 0 5px rgba(226,115,63,0.45));
+  }
 
-        .btn:disabled {
-            background-color: var(--text-muted);
-            cursor: not-allowed;
-            box-shadow: none;
-        }
-    </style>
+  .meta{
+    margin-top:1rem;
+    font-size:0.78rem;
+    letter-spacing:0.08em;
+    color:var(--ash-dim);
+    text-transform:uppercase;
+  }
+
+  .controls{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:0.7rem;
+    margin-top:2rem;
+    flex-wrap:wrap;
+  }
+
+  .icon-btn{
+    width:46px; height:46px;
+    border-radius:50%;
+    border:1px solid var(--border);
+    background:var(--charcoal-soft);
+    color:var(--ash);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+    transition:transform 0.15s ease, border-color 0.15s ease, color 0.15s ease, background 0.15s ease;
+  }
+  .icon-btn svg{ width:19px; height:19px; }
+  .icon-btn:hover{ border-color:var(--gold); color:var(--bone); transform:translateY(-1px); }
+  .icon-btn:active{ transform:translateY(0); }
+  .icon-btn:disabled{ opacity:0.35; cursor:not-allowed; transform:none; }
+  .icon-btn:focus-visible{ outline:2px solid var(--ember-bright); outline-offset:2px; }
+
+  .icon-btn.is-fav{ color:var(--ember-bright); border-color:var(--ember); }
+
+  .icon-btn.primary{
+    width:auto;
+    padding:0 1.3rem;
+    border-radius:23px;
+    background:var(--ember);
+    border-color:var(--ember);
+    color:var(--bone);
+    gap:0.5rem;
+    font-family:'Work Sans', sans-serif;
+    font-weight:600;
+    font-size:0.92rem;
+  }
+  .icon-btn.primary:hover{ background:var(--ember-bright); border-color:var(--ember-bright); color:#1c1815; }
+
+  .hint{
+    margin-top:1rem;
+    font-size:0.72rem;
+    color:var(--ash-dim);
+    letter-spacing:0.03em;
+  }
+
+  .fav-toggle{
+    margin-top:2.2rem;
+    background:none;
+    border:none;
+    color:var(--ash);
+    font-family:'Work Sans', sans-serif;
+    font-size:0.85rem;
+    cursor:pointer;
+    display:flex; align-items:center; gap:0.4rem;
+    padding:0.4rem 0.2rem;
+  }
+  .fav-toggle:hover{ color:var(--bone); }
+  .fav-toggle svg{ width:14px; height:14px; }
+
+  .fav-panel{
+    width:100%;
+    margin-top:0.8rem;
+    border-top:1px solid var(--border);
+    padding-top:1rem;
+  }
+  .fav-panel.hidden{ display:none; }
+
+  .fav-empty{ color:var(--ash-dim); font-size:0.85rem; text-align:center; margin:0.5rem 0; }
+
+  .fav-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:0.5rem; }
+  .fav-item{
+    display:flex; align-items:center; justify-content:space-between;
+    background:var(--charcoal-soft);
+    border:1px solid var(--border);
+    border-radius:6px;
+    padding:0.7rem 0.9rem;
+    gap:0.8rem;
+  }
+  .fav-item button.go{
+    flex:1; text-align:left; background:none; border:none; color:var(--ash);
+    font-family:'Crimson Pro', serif; font-style:italic; font-size:0.92rem; cursor:pointer; padding:0;
+  }
+  .fav-item button.go:hover{ color:var(--bone); }
+  .fav-item button.remove{
+    background:none; border:none; color:var(--ash-dim); cursor:pointer; font-size:1rem; line-height:1; padding:0.2rem;
+  }
+  .fav-item button.remove:hover{ color:var(--ember-bright); }
+
+  .toast{
+    position:fixed; bottom:28px; left:50%;
+    transform:translate(-50%, 12px);
+    background:var(--bone); color:var(--obsidian);
+    font-family:'Work Sans', sans-serif; font-weight:500; font-size:0.85rem;
+    padding:0.65rem 1.2rem; border-radius:24px;
+    opacity:0; pointer-events:none;
+    transition:opacity 0.25s ease, transform 0.25s ease;
+    box-shadow:0 12px 24px -8px rgba(0,0,0,0.5);
+  }
+  .toast.show{ opacity:1; transform:translate(-50%, 0); }
+
+  @media (prefers-reduced-motion: reduce){
+    .shayari, .icon-btn, .toast, .crack path{ transition:none !important; }
+  }
+
+  @media (max-width:420px){
+    .card{ padding:2.1rem 1.4rem 1.7rem; }
+    .icon-btn{ width:42px; height:42px; }
+  }
+</style>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Dil Se...</h1>
-        
-        <div class="card">
-            <p class="shayari-text" id="shayariDisplay">Loading shayaris...</p>
-            <div class="shayari-id" id="idDisplay"></div>
-        </div>
+<main class="page">
+  <header class="masthead">
+    <h1 class="wordmark">Toota<span class="dot">.</span></h1>
+    <p class="tagline">shayari on dhoka, dard &amp; dil</p>
+  </header>
 
-        <button class="btn" id="generateBtn" disabled>Next Shayari</button>
+  <section class="stage" aria-live="polite">
+    <div class="card">
+      <p class="shayari" id="shayariText">Loading shayari…</p>
+      <svg class="crack" id="crackSvg" viewBox="0 0 400 22" preserveAspectRatio="none" aria-hidden="true">
+        <path id="crackPath" d=""></path>
+      </svg>
     </div>
+    <div class="meta" id="metaLine">— · — of —</div>
+  </section>
 
-    <script>
-        const shayariDisplay = document.getElementById('shayariDisplay');
-        const idDisplay = document.getElementById('idDisplay');
-        const generateBtn = document.getElementById('generateBtn');
+  <nav class="controls" aria-label="Shayari controls">
+    <button class="icon-btn" id="prevBtn" aria-label="Previous shayari" title="Previous" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+    </button>
+    <button class="icon-btn" id="favBtn" aria-label="Save to favourites" title="Save" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+    </button>
+    <button class="icon-btn" id="copyBtn" aria-label="Copy shayari" title="Copy" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+    </button>
+    <button class="icon-btn" id="shareBtn" aria-label="Share shayari" title="Share" disabled>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12v7a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7"></path><polyline points="16 6 12 2 8 6"></polyline><line x1="12" y1="2" x2="12" y2="15"></line></svg>
+    </button>
+    <button class="icon-btn primary" id="nextBtn" aria-label="Next shayari" title="Next" disabled>
+      Next
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+    </button>
+  </nav>
 
-        let shayariList = [];
-        let lastIndex = -1;
+  <p class="hint">use ← → to move between shayari, F to save</p>
 
-        // Fetch the external JSON file
-        async function loadShayaris() {
-            try {
-                const response = await fetch('list2.json');
-                if (!response.ok) {
-                    throw new Error('Failed to load list2.json');
-                }
-                shayariList = await response.json();
-                
-                if (shayariList.length > 0) {
-                    generateBtn.disabled = false;
-                    displayRandomShayari();
-                } else {
-                    shayariDisplay.textContent = "The shayari list is empty.";
-                }
-            } catch (error) {
-                console.error(error);
-                shayariDisplay.textContent = "Error loading shayaris. Make sure list2.json is in the same folder.";
-            }
-        }
+  <button class="fav-toggle" id="favToggle">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.6l-1-1a5.5 5.5 0 0 0-7.8 7.8l1 1L12 21l7.8-7.6 1-1a5.5 5.5 0 0 0 0-7.8z"></path></svg>
+    Saved (<span id="favCount">0</span>)
+  </button>
 
-        function displayRandomShayari() {
-            let randomIndex;
-            
-            // Prevent choosing the same one twice in a row
-            do {
-                randomIndex = Math.floor(Math.random() * shayariList.length);
-            } while (randomIndex === lastIndex && shayariList.length > 1);
+  <div class="fav-panel hidden" id="favPanel">
+    <p class="fav-empty" id="favEmpty">Nothing saved yet — tap the heart on a shayari to keep it here.</p>
+    <ul class="fav-list" id="favList"></ul>
+  </div>
+</main>
 
-            lastIndex = randomIndex;
-            const selected = shayariList[randomIndex];
-            
-            // Smooth fade transition
-            shayariDisplay.style.opacity = 0;
-            idDisplay.style.opacity = 0;
-            
-            setTimeout(() => {
-                shayariDisplay.textContent = selected.text;
-                idDisplay.textContent = `Shayari #${selected.id || randomIndex + 1}`;
-                shayariDisplay.style.opacity = 1;
-                idDisplay.style.opacity = 1;
-            }, 150);
-        }
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
-        // Event listeners
-        window.addEventListener('DOMContentLoaded', loadShayaris);
-        generateBtn.addEventListener('click', displayRandomShayari);
-    </script>
+<script>
+  const shayariText = document.getElementById('shayariText');
+  const metaLine = document.getElementById('metaLine');
+  const crackPath = document.getElementById('crackPath');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+  const favBtn = document.getElementById('favBtn');
+  const copyBtn = document.getElementById('copyBtn');
+  const shareBtn = document.getElementById('shareBtn');
+  const favToggle = document.getElementById('favToggle');
+  const favPanel = document.getElementById('favPanel');
+  const favList = document.getElementById('favList');
+  const favEmpty = document.getElementById('favEmpty');
+  const favCount = document.getElementById('favCount');
+  const toast = document.getElementById('toast');
+
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+  let shayariList = [];
+  let history = [];      // indices visited, in order
+  let historyPos = -1;   // pointer into history
+  let favourites = new Set(); // in-memory only, resets on reload
+
+  async function loadShayaris(){
+    try{
+      const res = await fetch('list2.json');
+      if(!res.ok) throw new Error('Failed to load list2.json');
+      shayariList = await res.json();
+      if(!Array.isArray(shayariList) || shayariList.length === 0){
+        shayariText.textContent = 'The shayari list is empty.';
+        return;
+      }
+      [prevBtn, nextBtn, favBtn, copyBtn, shareBtn].forEach(b => b.disabled = false);
+      goToRandom();
+    }catch(err){
+      console.error(err);
+      shayariText.textContent = "Couldn't load list2.json. Make sure it's in the same folder as this page.";
+    }
+  }
+
+  function currentEntry(){
+    if(historyPos < 0 || historyPos >= history.length) return null;
+    return shayariList[history[historyPos]];
+  }
+
+  function render(){
+    const entry = currentEntry();
+    if(!entry) return;
+
+    shayariText.style.opacity = 0;
+    setTimeout(() => {
+      shayariText.textContent = entry.text;
+      shayariText.style.opacity = 1;
+      drawCrack();
+    }, 180);
+
+    metaLine.textContent = `#${String(entry.id).padStart(3,'0')} · ${historyPos + 1} of ${shayariList.length}`;
+    prevBtn.disabled = historyPos <= 0;
+
+    const isFav = favourites.has(entry.id);
+    favBtn.classList.toggle('is-fav', isFav);
+    favBtn.setAttribute('aria-pressed', isFav ? 'true' : 'false');
+  }
+
+  function goToRandom(){
+    let idx;
+    const last = history[historyPos];
+    do{
+      idx = Math.floor(Math.random() * shayariList.length);
+    }while(idx === last && shayariList.length > 1);
+
+    // if we're not at the end of history, drop the forward branch
+    history = history.slice(0, historyPos + 1);
+    history.push(idx);
+    historyPos = history.length - 1;
+    render();
+  }
+
+  function goBack(){
+    if(historyPos > 0){
+      historyPos -= 1;
+      render();
+    }
+  }
+
+  function drawCrack(){
+    const steps = 9;
+    let d = '';
+    for(let i = 0; i <= steps; i++){
+      const x = (400 / steps) * i;
+      const y = 11 + (Math.random() * 16 - 8);
+      d += (i === 0 ? `M${x.toFixed(1)},${y.toFixed(1)}` : ` L${x.toFixed(1)},${y.toFixed(1)}`);
+    }
+    crackPath.setAttribute('d', d);
+    const len = crackPath.getTotalLength();
+    crackPath.style.transition = 'none';
+    crackPath.style.strokeDasharray = len;
+    crackPath.style.strokeDashoffset = len;
+    crackPath.getBoundingClientRect(); // force reflow
+    if(!reduceMotion){
+      crackPath.style.transition = 'stroke-dashoffset 0.8s cubic-bezier(.16,.8,.3,1)';
+    }
+    requestAnimationFrame(() => { crackPath.style.strokeDashoffset = 0; });
+  }
+
+  function showToast(msg){
+    toast.textContent = msg;
+    toast.classList.add('show');
+    clearTimeout(showToast._t);
+    showToast._t = setTimeout(() => toast.classList.remove('show'), 1800);
+  }
+
+  function toggleFavourite(){
+    const entry = currentEntry();
+    if(!entry) return;
+    if(favourites.has(entry.id)){
+      favourites.delete(entry.id);
+      showToast('Removed from saved');
+    }else{
+      favourites.add(entry.id);
+      showToast('Saved');
+    }
+    renderFavList();
+    render();
+  }
+
+  function renderFavList(){
+    favCount.textContent = favourites.size;
+    favList.innerHTML = '';
+    favEmpty.style.display = favourites.size === 0 ? 'block' : 'none';
+    [...favourites].forEach(id => {
+      const entry = shayariList.find(s => s.id === id);
+      if(!entry) return;
+      const li = document.createElement('li');
+      li.className = 'fav-item';
+
+      const goBtn = document.createElement('button');
+      goBtn.className = 'go';
+      goBtn.textContent = entry.text.split('\n')[0];
+      goBtn.addEventListener('click', () => {
+        const idx = shayariList.indexOf(entry);
+        history = history.slice(0, historyPos + 1);
+        history.push(idx);
+        historyPos = history.length - 1;
+        render();
+      });
+
+      const rmBtn = document.createElement('button');
+      rmBtn.className = 'remove';
+      rmBtn.setAttribute('aria-label', 'Remove from saved');
+      rmBtn.textContent = '×';
+      rmBtn.addEventListener('click', () => {
+        favourites.delete(id);
+        renderFavList();
+        render();
+      });
+
+      li.appendChild(goBtn);
+      li.appendChild(rmBtn);
+      favList.appendChild(li);
+    });
+  }
+
+  async function copyCurrent(){
+    const entry = currentEntry();
+    if(!entry) return;
+    try{
+      await navigator.clipboard.writeText(entry.text);
+      showToast('Copied to clipboard');
+    }catch(err){
+      showToast("Couldn't copy — try selecting the text instead");
+    }
+  }
+
+  async function shareCurrent(){
+    const entry = currentEntry();
+    if(!entry) return;
+    if(navigator.share){
+      try{
+        await navigator.share({ text: entry.text });
+      }catch(err){
+        // user cancelled share sheet — no toast needed
+      }
+    }else{
+      try{
+        await navigator.clipboard.writeText(entry.text);
+        showToast('Copied — paste it anywhere to share');
+      }catch(err){
+        showToast("Couldn't share or copy");
+      }
+    }
+  }
+
+  nextBtn.addEventListener('click', goToRandom);
+  prevBtn.addEventListener('click', goBack);
+  favBtn.addEventListener('click', toggleFavourite);
+  copyBtn.addEventListener('click', copyCurrent);
+  shareBtn.addEventListener('click', shareCurrent);
+
+  favToggle.addEventListener('click', () => favPanel.classList.toggle('hidden'));
+
+  window.addEventListener('keydown', (e) => {
+    if(shayariList.length === 0) return;
+    if(e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); goToRandom(); }
+    else if(e.key === 'ArrowLeft'){ e.preventDefault(); goBack(); }
+    else if(e.key.toLowerCase() === 'f'){ toggleFavourite(); }
+    else if(e.key.toLowerCase() === 'c'){ copyCurrent(); }
+  });
+
+  window.addEventListener('DOMContentLoaded', loadShayaris);
+</script>
+
 </body>
 </html>
