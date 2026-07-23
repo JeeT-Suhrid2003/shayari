@@ -72,6 +72,11 @@
     z-index:5;
   }
 
+  .login-wrap{
+    position:relative;
+    display:inline-flex;
+  }
+
   .login-chip{
     display:inline-flex;
     align-items:center;
@@ -84,16 +89,33 @@
     color:var(--bone);
     box-shadow:0 12px 24px -16px rgba(0,0,0,0.6);
     backdrop-filter:blur(8px);
-    cursor:pointer;
     transition:transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
-    overflow:hidden;
+    overflow:visible;
     font-family:'Work Sans', sans-serif;
     gap:0.55rem;
+    pointer-events:none; /* the real, invisible Google button sits on top and receives clicks */
   }
 
-  .login-chip:hover{ border-color:var(--gold); background:rgba(34,29,25,0.95); transform:translateY(-1px); }
-  .login-chip:active{ transform:translateY(0); }
-  .login-chip:focus-visible{ outline:2px solid var(--ember-bright); outline-offset:2px; }
+  .login-wrap:hover .login-chip{ border-color:var(--gold); background:rgba(34,29,25,0.95); transform:translateY(-1px); }
+  .login-wrap:has(.login-real:focus-visible) .login-chip,
+  .login-wrap:focus-within .login-chip{ outline:2px solid var(--ember-bright); outline-offset:2px; }
+
+  /* The actual Google sign-in button — fully functional, fully invisible,
+     stretched to cover the visual chip so real clicks land on it. */
+  .login-real{
+    position:absolute;
+    inset:0;
+    opacity:0;
+    overflow:hidden;
+    border-radius:999px;
+    cursor:pointer;
+    z-index:2;
+  }
+  .login-real iframe{
+    width:100% !important;
+    height:100% !important;
+  }
+  .login-real.signed-in{ display:none; }
 
   .login-chip .icon{
     width:20px;
@@ -304,15 +326,18 @@
 <main class="page">
   <header class="masthead">
     <div class="login-area">
-      <button type="button" id="googleLoginBtn" class="login-chip" aria-label="Sign in with Google">
-        <svg class="g-icon" viewBox="0 0 48 48" aria-hidden="true">
-          <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-          <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.9-2.26 5.36-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-          <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-          <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-        </svg>
-        <span class="label" id="loginLabel">Sign in</span>
-      </button>
+      <div class="login-wrap" id="loginWrap">
+        <div class="login-chip" id="loginVisual" aria-hidden="true">
+          <svg class="g-icon" viewBox="0 0 48 48" aria-hidden="true">
+            <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+            <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.9-2.26 5.36-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+            <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+            <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+          </svg>
+          <span class="label" id="loginLabel">Sign in</span>
+        </div>
+        <div id="googleLoginBtn" class="login-real"></div>
+      </div>
       <div id="loginStatus" class="login-status"></div>
       <div class="login-note">If Google shows “no registered origin”, add http://localhost:8000 in Google Cloud Console.</div>
     </div>
@@ -382,7 +407,9 @@
   const favCount = document.getElementById('favCount');
   const toast = document.getElementById('toast');
   const loginStatus = document.getElementById('loginStatus');
-  const loginBtnContainer = document.getElementById('googleLoginBtn');
+  const loginVisual = document.getElementById('loginVisual');
+  const loginRealBtn = document.getElementById('googleLoginBtn');
+  const loginWrap = document.getElementById('loginWrap');
 
   const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const googleClientId = window.GOOGLE_CLIENT_ID || '284638324319-cndgo9r8p289mdlelguidagjneagchud.apps.googleusercontent.com';
@@ -394,20 +421,20 @@
   }
 
   function renderSignedInAvatar(user) {
-    if (!loginBtnContainer) return;
+    if (!loginVisual) return;
 
     const avatarUrl = user?.picture || '';
     const firstName = (user?.name || user?.email || 'Account').split(' ')[0];
-    loginBtnContainer.innerHTML = '';
-    loginBtnContainer.classList.add('avatar-chip');
-    loginBtnContainer.setAttribute('aria-label', `Signed in as ${user?.name || user?.email || ''}`);
+    loginVisual.innerHTML = '';
+    loginVisual.classList.add('avatar-chip');
+    loginWrap.setAttribute('aria-label', `Signed in as ${user?.name || user?.email || ''}`);
 
     if (avatarUrl) {
       const img = document.createElement('img');
       img.src = avatarUrl;
       img.alt = user?.name || 'User avatar';
       img.referrerPolicy = 'no-referrer';
-      loginBtnContainer.appendChild(img);
+      loginVisual.appendChild(img);
     } else {
       const fallback = document.createElement('div');
       fallback.textContent = '👤';
@@ -416,13 +443,17 @@
       fallback.style.display = 'flex';
       fallback.style.alignItems = 'center';
       fallback.style.justifyContent = 'center';
-      loginBtnContainer.appendChild(fallback);
+      loginVisual.appendChild(fallback);
     }
 
     const nameEl = document.createElement('span');
     nameEl.className = 'avatar-name';
     nameEl.textContent = firstName;
-    loginBtnContainer.appendChild(nameEl);
+    loginVisual.appendChild(nameEl);
+
+    // Once signed in, the real Google button is no longer needed —
+    // hide it so it doesn't sit on top intercepting clicks.
+    if (loginRealBtn) loginRealBtn.classList.add('signed-in');
   }
 
   function decodeJwtPayload(token) {
@@ -520,12 +551,12 @@
           cancel_on_tap_outside: false
         });
 
-        loginBtnContainer.addEventListener('click', () => {
-          google.accounts.id.prompt((notification) => {
-            if (notification.isNotDisplayed() || notification.isSkippedMoment()) {
-              showLoginStatus('Pop-up blocked or skipped — allow pop-ups for this site and try again.', 'error');
-            }
-          });
+        google.accounts.id.renderButton(loginRealBtn, {
+          theme: 'outline',
+          size: 'large',
+          shape: 'pill',
+          width: 220,
+          text: 'signin_with'
         });
 
         const storedUser = localStorage.getItem('googleUser');
